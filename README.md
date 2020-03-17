@@ -31,3 +31,5 @@ Viewing the Trace
 Open chrome and enter **chrome://tracing** in the URL bar. In the *Chrome Trace View* click
 on load and select the generated trace.
 
+![Example of Chrome Trace View](https://github.com/dmarquant/dmq_trace/blob/master/trace_view.png "Example of Chrome Trace View")
+
