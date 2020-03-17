@@ -59,13 +59,13 @@ void dmq_trace_end() {
     fclose(g_trace_profile);
 }
 
-void dmq_trace_start_event(dmq_event* event, const char* name) {
+void dmq_trace_start_event(dmq_trace_event* event, const char* name) {
     // TODO: Maybe we will have to copy this...
     event->name = name;
     event->start_time_us = get_current_time_us();
 }
 
-void dmq_trace_stop_event(dmq_event* event) {
+void dmq_trace_stop_event(dmq_trace_event* event) {
     u64 stop_us = get_current_time_us();
     u64 start_us = event->start_time_us;
 

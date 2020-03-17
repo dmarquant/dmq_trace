@@ -23,7 +23,7 @@
 
 int main(int argc, char** argv) {
     int i;
-    dmq_event e;
+    dmq_trace_event e;
     int t[NUM_TASKS];
 
     auto start = std::chrono::high_resolution_clock::now();
@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
 
     #pragma omp parallel for
     for (i = 0; i < NUM_TASKS; i++) {
-        dmq_event e;
+        dmq_trace_event e;
         DMQ_START_EVENT(&e, "Compute");
         std::this_thread::sleep_for(std::chrono::milliseconds(t[i]));
         DMQ_STOP_EVENT(&e);
