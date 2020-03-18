@@ -43,8 +43,6 @@ timer.stop();
 DMQ_TRACE_END();
 ```
 
-
-
 Viewing the Trace
 -----------------
 
@@ -53,3 +51,7 @@ on load and select the generated trace.
 
 ![Example of Chrome Trace View](https://github.com/dmarquant/dmq_trace/blob/master/trace_view.png "Example of Chrome Trace View")
 
+Disabling the Trace
+-------------------
+
+You can disable the trace by defining `DMQ_DISABLE_TRACE`.
