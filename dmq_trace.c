@@ -1,14 +1,15 @@
 #include "dmq_trace.h"
 
 #include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32)
 #include <windows.h>
-typedef unsigned long long u64;
 
 LARGE_INTEGER g_performance_frequency;
 
@@ -16,7 +17,7 @@ void init_timer() {
     QueryPerformanceFrequency(&g_performance_frequency);
 }
 
-u64 get_current_time_us() {
+uint64_t get_current_time_us() {
     LARGE_INTEGER now;
     QueryPerformanceCounter(&now);
     return (now.QuadPart * 1000000) / g_performance_frequency.QuadPart;
@@ -36,6 +37,44 @@ void unlock() {
     LeaveCriticalSection(&g_lock);
 }
 
+int get_thread_id() {
+    return GetCurrentThreadId();
+}
+
+#elif defined(__linux__)
+#include <pthread.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/syscall.h>
+#include <time.h>
+
+void init_timer() {
+}
+
+uint64_t get_current_time_us() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    
+    uint64_t time_us = (ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
+    return time_us;
+}
+
+pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
+
+void init_lock() {
+}
+
+void lock() {
+    pthread_mutex_lock(&g_lock);
+}
+
+void unlock() {
+    pthread_mutex_unlock(&g_lock);
+}
+
+int get_thread_id() {
+    return syscall(__NR_gettid);
+}
 #else
 #error "This OS is not supported with dmq trace"
 #endif
@@ -66,10 +105,10 @@ void dmq_trace_start_event(dmq_trace_event* event, const char* name) {
 }
 
 void dmq_trace_stop_event(dmq_trace_event* event) {
-    u64 stop_us = get_current_time_us();
-    u64 start_us = event->start_time_us;
+    uint64_t stop_us = get_current_time_us();
+    uint64_t start_us = event->start_time_us;
 
-    int tid = GetCurrentThreadId();
+    int tid = get_thread_id();
 
     lock();
     if (!g_first_event) {
@@ -78,7 +117,7 @@ void dmq_trace_stop_event(dmq_trace_event* event) {
         g_first_event = 0;
     }
     fprintf(g_trace_profile,
-            "{\"name\": \"%s\", \"ph\": \"X\", \"ts\": %I64u, \"dur\": %I64u, \"pid\": 0, \"tid\": %d}\n",
+            "{\"name\": \"%s\", \"ph\": \"X\", \"ts\": %" PRId64 ", \"dur\": %" PRId64 ", \"pid\": 0, \"tid\": %d}\n",
             event->name, start_us, stop_us - start_us, tid);
     unlock();
 }
